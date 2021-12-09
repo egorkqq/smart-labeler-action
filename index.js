@@ -56,11 +56,13 @@ async function run(octokit) {
     throw new Error("Labels not found");
   }
 
+  console.log("Adding these labels:", [...labels, ...parsedLabels]);
+
   return await octokit.rest.issues.addLabels({
     owner,
     repo,
     issue_number: prNumber,
-    labels: [...labels, ...parsedLabels],
+    labels: [...labels, ...parsedLabels].map(({ name }) => ({ name })),
   });
 }
 
