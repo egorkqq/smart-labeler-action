@@ -62,7 +62,7 @@ async function run(octokit) {
     owner,
     repo,
     issue_number: prNumber,
-    labels: [...labels, ...parsedLabels].map(({ name }) => ({ name })),
+    labels: [...labels, ...parsedLabels].map(({ name }) => name),
   });
 }
 
