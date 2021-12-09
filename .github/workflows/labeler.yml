@@ -7,6 +7,6 @@ jobs:
   add_milestone_from_issue:
     runs-on: ubuntu-latest
     steps:
-    - uses: egorkqq/smart-labeler-action@v0.1.4
+    - uses: egorkqq/smart-labeler-action@v0.1.5
       with: 
         github-token: ${{ secrets.GITHUB_TOKEN }}
