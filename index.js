@@ -45,8 +45,6 @@ async function run(octokit) {
     }
   );
 
-  console.log(repositoryLabels);
-
   const parsedLabels = repositoryLabels.filter((label) => {
     const formattedFeat = featLabelName.split("-").join(" ");
     return (

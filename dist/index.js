@@ -8451,9 +8451,9 @@ async function run(octokit) {
   } = github.context.payload;
   const { owner, repo } = github.context.repo;
 
-  const issueMatch = body.match(/#(\d+)/);
-  const featLabelMatch = title.match(/\/(\w+)/);
-  const typeLabelMatch = title.match(/(\w+)\(/);
+  const issueMatch = body ? body.match(/#(\d+)/) : null;
+  const featLabelMatch = title ? title.match(/\/(\w+)/) : null;
+  const typeLabelMatch = title ? title.match(/(\w+)\(/) : null;
 
   const noRelatedIssue = !issueMatch || issueMatch.length <= 1;
   const noFeat = !featLabelMatch || featLabelMatch.length <= 1;
@@ -8502,7 +8502,7 @@ async function run(octokit) {
     throw new Error("Labels not found");
   }
 
-  return await client.rest.issues.addLabels({
+  return await octokit.rest.issues.addLabels({
     owner,
     repo,
     issue_number: prNumber,
@@ -8516,10 +8516,6 @@ async function main() {
     const {
       data: { labels },
     } = await run(octokit);
-
-    labels.forEach((label, index) =>
-      core.setOutput(`setted label ${index}`, label.name)
-    );
   } catch (error) {
     core.setFailed(error.message);
   }
