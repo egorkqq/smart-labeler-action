@@ -1,0 +1,12 @@
+name: 'Smart Labeler action'
+description: 'Github Action for automatic labeling pull requests'
+inputs:
+  github-token:  
+    description: 'from github secrets'
+    required: true
+runs:
+  using: 'node12'
+  main: 'index.js'
+branding:
+  icon: 'git-pull-request'
+  color: 'green'
