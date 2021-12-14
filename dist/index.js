@@ -8445,10 +8445,38 @@ var __webpack_exports__ = {};
 const core = __nccwpck_require__(7639);
 const github = __nccwpck_require__(9113);
 
+const featureAliases = [
+  "feat",
+  "feature",
+  "refactor",
+  "style",
+];
+
+const bugAliases = [
+  "bug",
+  "fix",
+  "bugfix",
+];
+
+const choreAliases = [
+  "chore",
+  "docs",
+  "build",
+];
+
 function getLabelValue(label) {
 
-  return label.split(':')[1];
+  return label.split(":")[1];
 }
+
+function getTypeValue(typeLabelName) {
+  if (featureAliases.includes(typeLabelName)) return "feature";
+  if (bugAliases.includes(typeLabelName)) return "bug";
+  if (choreAliases.includes(typeLabelName)) return "chore";
+
+  return "no_type"
+}
+
 
 async function run(octokit) {
   const {
@@ -8495,11 +8523,12 @@ async function run(octokit) {
   );
 
   const parsedLabels = repositoryLabels.filter((label) => {
-    const formattedFeat = featLabelName.split("-").join(" ");
     const formattedLabel = getLabelValue(label.name);
+    const formattedFeat = featLabelName.split("-").join(" ");
+    const formattedType = getTypeValue(typeLabelName);
     
     return (
-      formattedLabel.includes(formattedFeat) || formattedLabel.includes(typeLabelName)
+      formattedLabel.includes(formattedFeat) || formattedLabel.includes(formattedType)
     );
   });
 
