@@ -1,6 +1,6 @@
 # smart-labeler-action
 
-Github Action for automatic labeling pull requests
+Github Action for automatic labeling pull requests!
 
 ## Inputs
 
