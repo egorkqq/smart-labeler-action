@@ -8445,6 +8445,11 @@ var __webpack_exports__ = {};
 const core = __nccwpck_require__(7639);
 const github = __nccwpck_require__(9113);
 
+function getLabelValue(label) {
+
+  return label.split(':')[1];
+}
+
 async function run(octokit) {
   const {
     pull_request: { title, body, number: prNumber },
@@ -8491,8 +8496,10 @@ async function run(octokit) {
 
   const parsedLabels = repositoryLabels.filter((label) => {
     const formattedFeat = featLabelName.split("-").join(" ");
+    const formattedLabel = getLabelValue(label.name);
+    
     return (
-      label.name.includes(formattedFeat) || label.name.includes(typeLabelName)
+      formattedLabel.includes(formattedFeat) || formattedLabel.includes(typeLabelName)
     );
   });
 
@@ -8500,7 +8507,8 @@ async function run(octokit) {
     throw new Error("Labels not found");
   }
 
-  console.log("Adding these labels:", [...labels, ...parsedLabels]);
+  console.log("Adding these labels from issue:", labels);
+  console.log("And these from PR name:", parsedLabels);
 
   return await octokit.rest.issues.addLabels({
     owner,
@@ -8513,13 +8521,13 @@ async function run(octokit) {
 async function main() {
   try {
     const octokit = github.getOctokit(core.getInput("github-token"));
-    const {
-      data: { labels },
-    } = await run(octokit);
+    
+    await run(octokit);
   } catch (error) {
     core.setFailed(error.message);
   }
 }
+
 main();
 
 })();
