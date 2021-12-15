@@ -75,7 +75,7 @@ async function fetchLabelsFromIssue(issue, octokit, owner, repo) {
   if (!issue) return [];
 
   const { data } = await octokit.rest.issues.get({
-    issue_number: issueNumber,
+    issue_number: issue,
     owner,
     repo,
   });
