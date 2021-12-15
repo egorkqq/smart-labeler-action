@@ -89,6 +89,7 @@ async function fetchRepositoryLabels(octokit, owner, repo) {
     {
       owner,
       repo,
+      per_page: 100
     }
   );
   console.log('Repository labels List: ', repositoryLabels.map(({name}) => name));
