@@ -8485,7 +8485,7 @@ function getTypeValue(typeLabelName) {
 
     return "chore";
   } else {
-    console.log('Cant get type value from label ', label);
+    console.log('Cant get type value from label ', typeLabelName);
 
     return "no_type"
   }
