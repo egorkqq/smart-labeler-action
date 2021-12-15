@@ -8465,16 +8465,79 @@ const choreAliases = [
 ];
 
 function getLabelValue(label) {
+  const labelValue = label.split(":")[1];
+  console.log('Get value ', labelValue, 'from label ', label);
 
-  return label.split(":")[1];
+  return labelValue;
 }
 
 function getTypeValue(typeLabelName) {
-  if (featureAliases.includes(typeLabelName)) return "feature";
-  if (bugAliases.includes(typeLabelName)) return "bug";
-  if (choreAliases.includes(typeLabelName)) return "chore";
+  if (featureAliases.includes(typeLabelName)) {
+    console.log('Get type value feature from label ', typeLabelName);
 
-  return "no_type"
+    return "feature";
+  } else if (bugAliases.includes(typeLabelName)) { 
+    console.log('Get type value bug from label ', typeLabelName);
+
+    return "bug";
+  } else if (choreAliases.includes(typeLabelName)) {
+    console.log('Get type value chore from label ', typeLabelName);
+
+    return "chore";
+  } else {
+    console.log('Cant get type value from label ', label);
+
+    return "no_type"
+  }
+}
+
+function getNameFromTitle(title, regex) {
+  const match = title ? title.match(regex) : null;
+  if (!match || match.length <= 1) {
+    console.log('Cant get label info from PR title');
+
+    return null;
+  }
+  console.log('Found label info from PR title: ', match[1]);
+
+  return match[1];
+}
+
+function getIssueNumber(body) {
+  const match = body ? body.match(/#(\d+)/) : null;
+  if (!match || match.length <= 1) {
+    console.log('Issue number not found in PR description');
+
+    return null;
+  }
+  console.log('Issue number is ', match[1]);
+
+  return match[1];
+}
+
+async function fetchLabelsFromIssue(issue, octokit, owner, repo) {
+  if (!issue) return [];
+
+  const { data } = await octokit.rest.issues.get({
+    issue_number: issueNumber,
+    owner,
+    repo,
+  });
+
+  return data.labels;
+}
+
+async function fetchRepositoryLabels(octokit, owner, repo) {
+  const { data: repositoryLabels } = await octokit.request(
+    "GET /repos/{owner}/{repo}/labels",
+    {
+      owner,
+      repo,
+    }
+  );
+  console.log('Repository labels List: ', repositoryLabels.map(({name}) => name));
+
+  return repositoryLabels;
 }
 
 
@@ -8484,66 +8547,47 @@ async function run(octokit) {
   } = github.context.payload;
   const { owner, repo } = github.context.repo;
 
-  const issueMatch = body ? body.match(/#(\d+)/) : null;
-  const featLabelMatch = title ? title.match(/\/(\w+)/) : null;
-  const typeLabelMatch = title ? title.match(/(\w+)\(/) : null;
+  const issueNumber = getIssueNumber(body);
+  const featLabelName = getNameFromTitle(title, /\/(\w+)/);
+  const typeLabelName = getNameFromTitle(title, /(\w+)\(/);
 
-  const noRelatedIssue = !issueMatch || issueMatch.length <= 1;
-  const noFeat = !featLabelMatch || featLabelMatch.length <= 1;
-  const noType = !typeLabelMatch || typeLabelMatch.length <= 1;
-
-  if (noRelatedIssue && noFeat && noType) {
+  if (!issueNumber && !featLabelName && !typeLabelName) {
     throw new Error(
       "Startin 'self-distructing... I can not find source for picking label"
     );
   }
 
-  const issueNumber = noRelatedIssue ? null : issueMatch[1];
-  const featLabelName = noFeat ? null : featLabelMatch[1];
-  const typeLabelName = noType ? null : typeLabelMatch[1];
+  const issueLabels = await fetchLabelsFromIssue(issueNumber, octokit, owner, repo);
+  const repositoryLabels = await fetchRepositoryLabels(octokit, owner, repo)
 
-  let labels = [];
-
-  if (issueNumber) {
-    const { data: issue } = await octokit.rest.issues.get({
-      issue_number: issueNumber,
-      owner,
-      repo,
-    });
-
-    labels = [...labels, ...issue.labels];
-  }
-
-  const { data: repositoryLabels } = await octokit.request(
-    "GET /repos/{owner}/{repo}/labels",
-    {
-      owner,
-      repo,
-    }
-  );
 
   const parsedLabels = repositoryLabels.filter((label) => {
     const formattedLabel = getLabelValue(label.name);
     const formattedFeat = featLabelName.split("-").join(" ");
     const formattedType = getTypeValue(typeLabelName);
+
+
+    console.log('formattedLabel value: ', formattedLabel)
+    console.log('formattedFeat value: ', formattedFeat)
+    console.log('formattedType value: ', formattedType)
     
     return (
       formattedLabel.includes(formattedFeat) || formattedLabel.includes(formattedType)
     );
   });
 
-  if (!parsedLabels.length && !labels.length) {
+  if (!parsedLabels.length && !issueLabels.length) {
     throw new Error("Labels not found");
   }
 
-  console.log("Adding these labels from issue:", labels);
+  console.log("Adding these labels from issue:", issueLabels);
   console.log("And these from PR name:", parsedLabels);
 
   return await octokit.rest.issues.addLabels({
     owner,
     repo,
     issue_number: prNumber,
-    labels: [...labels, ...parsedLabels].map(({ name }) => name),
+    labels: [...issueLabels, ...parsedLabels].map(({ name }) => name),
   });
 }
 
