@@ -8548,8 +8548,12 @@ async function run(octokit) {
   const { owner, repo } = github.context.repo;
 
   const issueNumber = getIssueNumber(body);
+
   const featLabelName = getNameFromTitle(title, /\/(\w+)/);
+  const formattedFeat = featLabelName.split("-").join(" ");
+
   const typeLabelName = getNameFromTitle(title, /(\w+)\(/);
+  const formattedType = getTypeValue(typeLabelName);
 
   if (!issueNumber && !featLabelName && !typeLabelName) {
     throw new Error(
@@ -8563,8 +8567,6 @@ async function run(octokit) {
 
   const parsedLabels = repositoryLabels.filter((label) => {
     const formattedLabel = getLabelValue(label.name);
-    const formattedFeat = featLabelName.split("-").join(" ");
-    const formattedType = getTypeValue(typeLabelName);
     
     return (
       formattedLabel.includes(formattedFeat) || formattedLabel.includes(formattedType)
