@@ -8565,11 +8565,6 @@ async function run(octokit) {
     const formattedLabel = getLabelValue(label.name);
     const formattedFeat = featLabelName.split("-").join(" ");
     const formattedType = getTypeValue(typeLabelName);
-
-
-    console.log('formattedLabel value: ', formattedLabel)
-    console.log('formattedFeat value: ', formattedFeat)
-    console.log('formattedType value: ', formattedType)
     
     return (
       formattedLabel.includes(formattedFeat) || formattedLabel.includes(formattedType)
