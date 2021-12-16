@@ -4,15 +4,18 @@ const github = require("@actions/github");
 const featureAliases = [
   "feat",
   "feature",
-  "refactor",
   "style",
 ];
 
-const bugAliases = [
+const fixAliases = [
   "bug",
   "fix",
   "bugfix",
 ];
+
+const refactorAliases = [
+  "refactor",
+]
 
 const choreAliases = [
   "chore",
@@ -32,10 +35,14 @@ function getTypeValue(typeLabelName) {
     console.log('Get type value feature from label ', typeLabelName);
 
     return "feature";
-  } else if (bugAliases.includes(typeLabelName)) { 
-    console.log('Get type value bug from label ', typeLabelName);
+  } else if (fixAliases.includes(typeLabelName)) { 
+    console.log('Get type value fix from label ', typeLabelName);
 
-    return "bug";
+    return "fix";
+  } else if (refactorAliases.includes(typeLabelName)) {
+    console.log('Get type value refactor from label ', typeLabelName);
+
+    return "refactor";
   } else if (choreAliases.includes(typeLabelName)) {
     console.log('Get type value chore from label ', typeLabelName);
 
@@ -106,7 +113,7 @@ async function run(octokit) {
 
   const issueNumber = getIssueNumber(body);
 
-  const featLabelName = getNameFromTitle(title, /\/(\w+)/);
+  const featLabelName = getNameFromTitle(title, /\((\w+)\)/);
   const formattedFeat = featLabelName.split("-").join(" ");
 
   const typeLabelName = getNameFromTitle(title, /(\w+)\(/);
