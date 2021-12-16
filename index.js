@@ -58,6 +58,7 @@ function getNameFromTitle(title, regex) {
   const match = title ? title.match(regex) : null;
   if (!match || match.length <= 1) {
     console.log('Cant get label info from PR title');
+    console.log('Title:', title);
 
     return null;
   }
@@ -114,7 +115,7 @@ async function run(octokit) {
   const issueNumber = getIssueNumber(body);
 
   const featLabelName = getNameFromTitle(title, /\((\w+)\)/);
-  const formattedFeat = featLabelName.split("-").join(" ");
+  const formattedFeat = featLabelName ? featLabelName.split("-").join(" ") : 'no_feat';
 
   const typeLabelName = getNameFromTitle(title, /(\w+)\(/);
   const formattedType = getTypeValue(typeLabelName);
